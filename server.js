@@ -12,7 +12,7 @@ io.on('connection', function (socket) {
 	//Client->(message)->Server->(message)->Rest of the clients
 	socket.on('message', function(message){
 		console.log('Message received: '+message.text);
-		socket.broadcast.emit('message', message);
+		io.emit('message', message);
 	});
 
 	socket.emit('message', {
