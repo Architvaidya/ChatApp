@@ -1,4 +1,5 @@
 var PORT = process.env.PORT || 3000;
+var moment = require('moment');
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -9,17 +10,19 @@ app.use(express.static(__dirname + '/public'));
 io.on('connection', function (socket) {
 	console.log('User connected via socket.io!');
 
-	//Client->(message)->Server->(message)->Rest of the clients
-	socket.on('message', function(message){
-		console.log('Message received: '+message.text);
+	socket.on('message', function (message) {
+		console.log('Message received: ' + message.text);
+
+		message.timestamp = moment().valueOf();
 		io.emit('message', message);
 	});
 
+	// timestamp property - JavaScript timestamp (milliseconds)
+
 	socket.emit('message', {
-		text: 'Welcome'
+		text: 'Welcome to the chat application!',
+		timestamp: moment().valueOf()
 	});
-	
-	
 });
 
 http.listen(PORT, function () {
