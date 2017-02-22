@@ -9,13 +9,35 @@ app.use(express.static(__dirname + '/public'));
 
 var clientInfo = {};
 
+function getCurrentUsers(socket){
+	var info = clientInfo[socket.id];
+	//console.log(info);
+	var users = [];
+	if(typeof info === 'undefined'){
+		return;
+	}else{
+		Object.keys(clientInfo).forEach(function(socketId){
+			var userInfo = clientInfo[socketId];
+			if(userInfo.room === info.room){
+				users.push(userInfo.name);
+			}
+		});
+
+		socket.emit('message', {
+			text: 'Current Users: '+users.join(', '),
+			timestamp: moment().valueOf(),
+			name: 'System'
+		});
+	}
+}
+
 io.on('connection', function (socket) {
 	console.log('User connected via socket.io!');
 
 	socket.on('disconnect', function(){
 		
 		var userData = clientInfo[socket.id];
-		console.log(userData);
+		//console.log(userData);
 		if(typeof userData !== 'undefined'){
 			socket.leave(userData.booth);
 			
@@ -30,7 +52,9 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('joinBooth', function(req){
+
 		clientInfo[socket.id] = req;
+		console.log(clientInfo[socket.id]);
 		socket.join(req.booth);
 		socket.broadcast.to(req.booth).emit('message', {
 			text: req.name +' has joined the booth '+req.booth,
@@ -41,8 +65,15 @@ io.on('connection', function (socket) {
 
 	socket.on('message', function (message) {
 		console.log('Message received: ' + message.text);
-		message.timestamp = moment().valueOf();
-		io.to(clientInfo[socket.id].booth).emit('message', message);
+		if(message.text === '@currentUsers'){	
+			getCurrentUsers(socket);
+		}else{
+			message.timestamp = moment().valueOf();
+			io.to(clientInfo[socket.id].booth).emit('message', message);	
+		}
+
+
+		
 		//io.emit('message', message);
 	});
 
