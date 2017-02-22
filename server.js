@@ -7,14 +7,26 @@ var io = require('socket.io')(http);
 
 app.use(express.static(__dirname + '/public'));
 
+var clientInfo = {};
+
 io.on('connection', function (socket) {
 	console.log('User connected via socket.io!');
 
+	socket.on('joinBooth', function(req){
+		clientInfo[socket.id] = req;
+		socket.join(req.booth);
+		socket.broadcast.to(req.booth).emit('message', {
+			text: req.name +' has joined the booth '+req.booth,
+			timestamp: moment().valueOf(),
+			name: 'System'
+		});
+	});
+
 	socket.on('message', function (message) {
 		console.log('Message received: ' + message.text);
-
 		message.timestamp = moment().valueOf();
-		io.emit('message', message);
+		io.to(clientInfo[socket.id].booth).emit('message', message);
+		//io.emit('message', message);
 	});
 
 	// timestamp property - JavaScript timestamp (milliseconds)

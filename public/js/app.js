@@ -1,10 +1,16 @@
 var socket = io();
 var name = getQueryVariable('name') || 'Anonymous';
-var cabin = getQueryVariable('cabin');
-console.log(name+' wants to join '+cabin);
+var booth = getQueryVariable('booth');
+console.log(name+' wants to join '+booth);
 socket.on('connect', function () {
 	console.log('Conncted to socket.io server!');
+	socket.emit('joinBooth', {
+		name: name,
+		booth: booth
+	});
 });
+
+jQuery('.booth').text(booth);	
 
 socket.on('message', function (message) {
 	var momentTimestamp = moment.utc(message.timestamp);
