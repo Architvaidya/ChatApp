@@ -54,7 +54,7 @@ io.on('connection', function (socket) {
 	socket.on('joinBooth', function(req){
 
 		clientInfo[socket.id] = req;
-		console.log(clientInfo[socket.id]);
+		//console.log(clientInfo[socket.id]);
 		socket.join(req.booth);
 		socket.broadcast.to(req.booth).emit('message', {
 			text: req.name +' has joined the booth '+req.booth,
