@@ -10,7 +10,7 @@ socket.on('connect', function () {
 	});
 });
 
-jQuery('.booth').text(booth);	
+jQuery('.booth').text('Welcome '+name+' to the chat '+booth);	
 
 socket.on('message', function (message) {
 	var momentTimestamp = moment.utc(message.timestamp);
